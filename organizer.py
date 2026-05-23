@@ -1,5 +1,6 @@
-import os
+import os, sys
 from pathlib import Path
+
 
 mapping_folders ={
         "documentos": ["Documentos", "Documents", "documents"],
@@ -52,7 +53,10 @@ def mover(root: Path):
                 
                 case "zipped":
                     destination = folders["documents"]
-                    
+
+                case _:
+                    destination = folders["documents"]
+
             for file in os.listdir(root):
                 text_extensions = tuple(mapping_files[extension])
                 
@@ -67,8 +71,14 @@ def mover(root: Path):
         return "Error", e
 
 
-if __name__ == "main":
-    mover(Path(__file__).parent)
+if __name__ == "__main__":
+    
+    if getattr(sys, 'frozen', False) or '__file__' not in dir():
+        base = Path.cwd()
+    else:
+        base = Path(__file__).parent
+
+    mover(base)
 
     
         
