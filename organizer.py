@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, shutil
 from pathlib import Path
 
 
@@ -21,58 +21,79 @@ def folders_finder(root: Path):
 
     folders = {}
 
-    try : 
-        for folder, folder_names in mapping_folders.items():
-            
-            for folder in folder_names:
-                
-                initial_path = root / folder
-                
+    try:
+        for key, folder_names in mapping_folders.items():
+
+            for folder_name in folder_names:
+
+                initial_path = root / folder_name
+
                 if initial_path.exists() and initial_path.is_dir():
-                    folders[folder] = initial_path
-                    
+
+                    folders[key] = initial_path
                     break
-        print(f"Completed")     
+
+        print("Completed")
         return folders
+
     except Exception as e:
-        return "Error, no folders found!", e
+        print(f"Error: {e}")
+        return {}
+
 
 def mover(root: Path):
     folders = folders_finder(root)
+
     try:
-        for extension in mapping_files:
-            match extension:
-                case "text":
-                    destination = folders["documents"]
+        for file in root.iterdir():
 
-                case "image":
-                    destination = folders["images"]
-                
-                case "video/audio":
-                    destination = folders["videos"]
-                
-                case "zipped":
-                    destination = folders["documents"]
+            # Ignore directories
+            if not file.is_file():
+                continue
 
-                case _:
-                    destination = folders["documents"]
+            extension = file.suffix.lower()
 
-            for file in os.listdir(root):
-                text_extensions = tuple(mapping_files[extension])
-                
-                if file.endswith(text_extensions):
-                    origin_folder = os.path.join(root, file)
-                    destination_folder = os.path.join(destination, file)
-                    os.rename(origin_folder, destination_folder)
+            destination = None
 
-            print(f"Files moved")
+            # Decide destination folder
+            for category, extensions in mapping_files.items():
+
+                if extension in extensions:
+
+                    match category:
+                        case "text":
+                            destination = folders.get("documentos")
+
+                        case "image":
+                            destination = folders.get("imagens")
+
+                        case "video/audio":
+                            destination = folders.get("videos")
+
+                        case "zipped":
+                            destination = folders.get("documentos")
+
+                        case _:
+                            destination = folders.get("documentos")
+
+                    break
+
+            # Move file
+            if destination:
+                destination_file = destination / file.name
+
+                shutil.move(str(file), str(destination_file))
+
+                print(f"Moved: {file.name} -> {destination}")
+
+        print("Files moved successfully.")
 
     except Exception as e:
-        return "Error", e
+        print(f"Error moving files: {e}")
 
 
 if __name__ == "__main__":
-    
+
     if getattr(sys, 'frozen', False) or '__file__' not in dir():
         base = Path.cwd()
     else:

@@ -13,10 +13,6 @@ Organizes files in a directory by type, moving them into categorized subfolders.
 | Zip        | .zip .rar .7z .iso                |
 | Others     | .exe .java .py .ipynb             |
 
-## Install
-
-```bash
-curl -sSL https://github.com/Willian-Fagundes/file-organizer/blob/main/organizer.py| bash
 ```
 
 ## Usage
